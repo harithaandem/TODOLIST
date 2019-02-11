@@ -15,6 +15,7 @@ var toDoList = (function () {
             toDoListArray[i].toDoId -= 1;
         }
     }
+
     ToDoConstructor.prototype.toDoDone = function(toDoItemId,selectedElement) { 
       switch(this.toDoStatus) {
         case false:
@@ -42,7 +43,6 @@ var toDoList = (function () {
         var updateFromPrompt = prompt("enter to update"," ");
         selectedElement.textContent += updateFromPrompt;
         this.toDoText = updateFromPrompt;
-
     }
 
     var textEntered = document.getElementById("textbox");
