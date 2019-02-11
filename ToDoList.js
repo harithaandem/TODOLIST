@@ -15,9 +15,7 @@ var toDoList = (function () {
             toDoListArray[i].toDoId -= 1;
         }
     }
-    ToDoConstructor.prototype.toDoDone = function(toDoItemId) { 
-      selectedParentElement = document.querySelector(`[todoId="${toDoItemId}"]`);
-      selectedElement = selectedParentElement.querySelector('[data-list="list"]');
+    ToDoConstructor.prototype.toDoDone = function(toDoItemId,selectedElement) { 
       switch(this.toDoStatus) {
         case false:
                  selectedElement.classList.remove('list');
@@ -33,16 +31,14 @@ var toDoList = (function () {
     } 
 
     ToDoConstructor.prototype.toDoDelete= function(toDoItemId) {
-        selectedParentElement = document.querySelector(`[todoId="${toDoItemId}"]`);
+        selectedParentElement=document.querySelector(`[todoId="${toDoItemId}"]`);
         selectedParentElement.remove();
         toDoListArray.splice(toDoItemId,1);
         this.updatingArray(toDoItemId);
         toDoId--;
     }
 
-    ToDoConstructor.prototype.toDoUpdate = function(toDoItemId) {
-        selectedParentElement = document.querySelector(`[todoId="${toDoItemId}"]`);
-        selectedElement = selectedParentElement.querySelector('[data-list="list"]');
+    ToDoConstructor.prototype.toDoUpdate = function(toDoItemId,selectedElement) {
         var updateFromPrompt = prompt("enter to update"," ");
         selectedElement.textContent += updateFromPrompt;
         this.toDoText = updateFromPrompt;
@@ -103,15 +99,17 @@ var toDoList = (function () {
      
     function listHandler(event) {
             toDoItemId = event.target.parentElement.getAttribute("toDoId");
+            selectedParentElement = document.querySelector(`[todoId="${toDoItemId}"]`);
+            selectedElement = selectedParentElement.querySelector('[data-list="list"]');
             switch(event.target.getAttribute("data-type")) {
                 case "done":
-                     toDoListArray[toDoItemId].toDoDone(toDoItemId);
+                     toDoListArray[toDoItemId].toDoDone(toDoItemId,selectedElement);
                      break;
                 case "delete":
                      toDoListArray[toDoItemId].toDoDelete(toDoItemId);
                      break;
                 case "update":
-                     toDoListArray[toDoItemId].toDoUpdate(toDoItemId);
+                     toDoListArray[toDoItemId].toDoUpdate(toDoItemId,selectedElement);
                      break;
                 default: break;
             }
