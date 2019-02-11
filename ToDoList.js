@@ -1,95 +1,124 @@
-var ToDoList = {};
+var toDoList = (function () {
+    var toDoListArray = [], toDoId = 0;
+    var selectedElement, selectedParentElement, toDoItemId;
 
-ToDoList.init = function () {
-    var cloneArray = [];
-    var descriptionToBeAdded, item,j;
-    document.getElementById("add_button").addEventListener('click', ToAdd);
-    var textEntered = document.getElementById("textbox");
-
-    document.addEventListener('keypress',KeyPress);
-
-    function KeyPress(event)
-    {
-        if(event.keyCode===13 || event.which===13)
-        ToAdd();
+    function ToDoConstructor(toDoText, toDoId) {
+        this.toDoText = toDoText;
+        this.toDoId = toDoId;
+        this.toDoStatus = false;
+        this.toDoChecked = false;
     }
 
-    function ToAdd() {
+    ToDoConstructor.prototype.updatingArray = function(toDoItemId) {
+        for(var i = toDoItemId; i < toDoListArray.length; i++) {
+            document.querySelector(`[toDoId="${toDoListArray[i].toDoId}"]`).setAttribute("toDoId",`${toDoListArray[i].toDoId-1}`);
+            toDoListArray[i].toDoId -= 1;
+        }
+    }
+    ToDoConstructor.prototype.toDoDone = function(toDoItemId) { 
+      selectedParentElement = document.querySelector(`[todoId="${toDoItemId}"]`);
+      selectedElement = selectedParentElement.querySelector('[data-list="list"]');
+      switch(this.toDoStatus) {
+        case false:
+                 selectedElement.classList.remove('list');
+                 selectedElement.classList.add('list_changed');  
+                 this.toDoStatus = true;
+                 break;
+        case true:
+                 selectedElement.classList.remove('list_changed'); 
+                 selectedElement.classList.add('list');  
+                 this.toDoStatus = false;
+                  break;
+      }
+    } 
+
+    ToDoConstructor.prototype.toDoDelete= function(toDoItemId) {
+        selectedParentElement = document.querySelector(`[todoId="${toDoItemId}"]`);
+        selectedParentElement.remove();
+        toDoListArray.splice(toDoItemId,1);
+        this.updatingArray(toDoItemId);
+        toDoId--;
+    }
+
+    ToDoConstructor.prototype.toDoUpdate = function(toDoItemId) {
+        selectedParentElement = document.querySelector(`[todoId="${toDoItemId}"]`);
+        selectedElement = selectedParentElement.querySelector('[data-list="list"]');
+        var updateFromPrompt = prompt("enter to update"," ");
+        selectedElement.textContent += updateFromPrompt;
+        this.toDoText = updateFromPrompt;
+
+    }
+
+    var textEntered = document.getElementById("textbox");
+    document.getElementById("add_button").addEventListener('click', toAdd);
+    document.addEventListener('keypress', KeyPress);
+
+    function KeyPress(event) {
+         if(event.keyCode === 13 || event.which === 13)
+         toAdd();
+    }
+
+    function toAdd() {
+        var descriptionToBeAdded;
         descriptionToBeAdded = textEntered.value;
-        if(descriptionToBeAdded==" "){
-           var textFromPrompt=prompt("enter something"," ");
-           descriptionToBeAdded=textFromPrompt;
+        if(descriptionToBeAdded == " ") {
+           var textFromPrompt = prompt("enter something"," ");
+           descriptionToBeAdded = textFromPrompt;
         }
         var item = document.querySelector(".inner_div");
         var clone = item.cloneNode(true);
         clone.querySelector('[data-list="list"]').textContent = descriptionToBeAdded;
-        clone.classList.add("div_list");
+        clone.setAttribute("toDoId",toDoId);
         clone.classList.remove("inner_div");
-        cloneArray.push(clone);
+        clone.classList.add("div_list");
+        var toDoElement = new ToDoConstructor(descriptionToBeAdded,toDoId);
+        toDoListArray.push(toDoElement);
         document.querySelector(".bottom").appendChild(clone);
-        textEntered.value=" ";
+        textEntered.value = " ";
+        toDoId++;
         
     }
 
-    document.getElementById("delete_selected_button").addEventListener('click', DeleteSelected);
+    document.getElementById("delete_selected_button").addEventListener('click', deleteSelected);
 
-    function DeleteSelected() {
-        var checkedArray= [], numberOfCheckedElements= 0;
-        for (j = 0; j < cloneArray.length; j++) {
-            if (cloneArray[j])
-                if (cloneArray[j].querySelector('[data-check="check"]').checked) {
-                    cloneArray[j].remove();
-                    checkedArray[numberOfCheckedElements++] = j;
-                }
-        }
-        while (numberOfCheckedElements) {
-            cloneArray.splice(checkedArray[--numberOfCheckedElements], 1);
+    function deleteSelected() {
+        for(var j = toDoListArray.length - 1; j >= 0; j--) {
+            selectedParentElement = document.querySelector(`[todoId="${j}"]`);
+            if(selectedParentElement.querySelector('[data-check="check"]').checked) {
+               toDoListArray[j].toDoChecked = true;
+               toDoListArray[j].toDoDelete(j);
+            }
         }
     }
-    
-    document.getElementById("delete_all").addEventListener('click',DeleteAll);
 
-    function DeleteAll()
-    {   
-        for(var k=0;k<cloneArray.length;k++)
-        {
-            cloneArray[k].remove();
-        }
-        cloneArray=[];
-    }
-    
-    document.getElementById("bottom_div").addEventListener('click', ListHandler);
-     
-    function ListHandler(event){
-        var selectedElement;
-        for(var i=0;i<cloneArray.length;i++)
-        {
-         selectedElement=cloneArray[i].querySelector('[data-list="list"]');
-         if(event.target===cloneArray[i].querySelector('[data-active="active_list"]'))
-         {   
-             selectedElement.classList.remove("list");
-             selectedElement.classList.add("list_changed");  
+    document.getElementById("delete_all").addEventListener('click',deleteAll);
+    function deleteAll() {
+       for(var j = toDoListArray.length - 1; j >= 0; j--)
+         {
+           toDoListArray[j].toDoDelete(j);
          }
-        
-        else if(event.target===cloneArray[i].querySelector('[data-delete="delete_list"]'))
-        {
-            cloneArray[i].remove();
-            cloneArray.splice(i,1);
-        }
+    }
 
-        else if(event.target===cloneArray[i].querySelector('[date-update="update_list"]'))
-        {
-           
-            var updateFromPrompt= prompt("enter to update"," ");
-            cloneArray[i].querySelector('[data-list="list"]').textContent=updateFromPrompt;
-        }
-        
-        }
-
+    document.getElementById("bottom_div").addEventListener('click', listHandler);
+     
+    function listHandler(event) {
+            toDoItemId = event.target.parentElement.getAttribute("toDoId");
+            switch(event.target.getAttribute("data-type")) {
+                case "done":
+                     toDoListArray[toDoItemId].toDoDone(toDoItemId);
+                     break;
+                case "delete":
+                     toDoListArray[toDoItemId].toDoDelete(toDoItemId);
+                     break;
+                case "update":
+                     toDoListArray[toDoItemId].toDoUpdate(toDoItemId);
+                     break;
+                default: break;
+            }
     };
-};
-ToDoList.init();
+})();
 
+toDoList;
 
 
 
