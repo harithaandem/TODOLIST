@@ -31,8 +31,8 @@
       }
     } 
 
-    ToDoConstructor.prototype.toDoDelete= function(toDoItemId) {
-        selectedParentElement=document.querySelector(`[todoId="${toDoItemId}"]`);
+    ToDoConstructor.prototype.toDoDelete = function(toDoItemId) {
+        selectedParentElement = document.querySelector(`[todoId="${toDoItemId}"]`);
         selectedParentElement.remove();
         toDoListArray.splice(toDoItemId,1);
         this.updatingArray(toDoItemId);
