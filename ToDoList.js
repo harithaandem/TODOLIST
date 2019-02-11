@@ -1,4 +1,4 @@
-var toDoList = (function () {
+(function () {
     var toDoListArray = [], toDoId = 0;
     var selectedElement, selectedParentElement, toDoItemId;
 
@@ -116,7 +116,7 @@ var toDoList = (function () {
     };
 })();
 
-toDoList;
+
 
 
 
